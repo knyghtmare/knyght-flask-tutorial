@@ -1,10 +1,20 @@
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, redirect, url_for, render_template, request, session, flash
+from datetime import timedelta
+
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask( __name__ )
 
 # secret key
 app.secret_key = "1k3jg2kl1h21f2g1s12x1fg3xn131"
-session = {}
+app.permanent_session_lifetime = timedelta(days = 5)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://user.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
+db = SQLAlchemy(app)
+
+# session = {}
 
 
 # home page
@@ -37,27 +47,44 @@ def admin():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
+        session.permanent = True
         user_login = request.form["nm"]
         session["user"] = user_login
+        flash("Login Successful")
         return redirect(url_for("user"))
     else:
         if "user" in session:
             return redirect(url_for("user"))
+            flash("Already Logged In!")
         return render_template("login.html")
 
 
-@app.route("/user")
+@app.route("/user", methods=["POST", "GET"])
 def user():
+    email = None
     if "user" in session:
         user = session["user"]
-        return f"<h1>{user}</h1>"
+        if request.method == "POST":
+            email = request.form["email"]
+            session["email"] = email
+            flash("Email was saved!")
+        else:
+            if "email" in session:
+                email = session["email"]
+        return render_template("user.html", email=email)
     else:
+        flash("You are not Logged In!")
         return redirect(url_for("login"))
 
 
 @app.route("/logout")
 def logout():
+    # if "user" in session:
+    #    user = session["user"]
+    #    flash(f"You have been logged out!, {user}", "info")
     session.pop("user", None)
+    session.pop("email", None)
+    flash(f"You have been logged out!", "info")
     return redirect(url_for("login"))
 
 
