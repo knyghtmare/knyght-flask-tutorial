@@ -8,7 +8,7 @@ app = Flask( __name__ )
 # secret key
 app.secret_key = "1k3jg2kl1h21f2g1s12x1fg3xn131"
 app.permanent_session_lifetime = timedelta(days = 5)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://user.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://users.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -16,9 +16,9 @@ db = SQLAlchemy(app)
 
 
 class users(db.Model):
-    _id = db.column("id", db.Integer, primary_key=True)
-    name = db.column("name", db.String(100))
-    email = db.column("email", db.String(100))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column("name", db.String(100))
+    email = db.Column("email", db.String(100))
 
     def __init__(self, name, email):
         self.name = name
@@ -60,6 +60,15 @@ def login():
         session.permanent = True
         user_login = request.form["nm"]
         session["user"] = user_login
+
+        found_user = users.query.filter_by(name=user).first()
+        if found_user:
+            session["email"] = found_user.email
+        else:
+            usr = users(user, "")
+            db.session.add(usr)
+            db.session.commit()
+
         flash("Login Successful")
         return redirect(url_for("user"))
     else:
@@ -77,6 +86,9 @@ def user():
         if request.method == "POST":
             email = request.form["email"]
             session["email"] = email
+            found_user = users.query.filter_by(name=user).first()
+            found_user.email = email
+            db.session.commit()
             flash("Email was saved!")
         else:
             if "email" in session:
