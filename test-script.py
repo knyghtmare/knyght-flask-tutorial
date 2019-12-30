@@ -14,6 +14,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+
+class users(db.Model):
+    _id = db.column("id", db.Integer, primary_key=True)
+    name = db.column("name", db.String(100))
+    email = db.column("email", db.String(100))
+
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+
 # session = {}
 
 
@@ -89,4 +99,5 @@ def logout():
 
 
 if __name__ == "__main__":
+    db.create_all()
     app.run(debug=True)
