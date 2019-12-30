@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Hello!</title>
+  </head>
+  <body>
+    <h1>Hello!</h1>
+    <h2>This is the Index Page!</h2>
+
+    <p>{{content}}</p>
+
+    <!-- You can run python code in this file using: -->
+    {% for x in range(10) %}
+        {% if x % 2 == 1 %}
+            <p>Yippee!</p>
+            <p>{{x}}</p>
+        {% endif %}
+    {% endfor %}
+  </body>
+</html>
